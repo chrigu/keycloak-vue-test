@@ -9,8 +9,6 @@
 <script>
 // @ is an alias to /src
 
-import {onLogin} from '@/vue-apollo'
-
 import ME_QUERY from '@/graphql/test.gql'
 
 export default {
@@ -27,9 +25,9 @@ export default {
     }
   },
   mounted: async function () {
-    if (this.$keycloak && this.$keycloak.authenticated) {
+    if (this.$keycloak.authenticated) {
       this.userName = this.$keycloak.tokenParsed.email
-      await onLogin(this.$apollo.provider.defaultClient, this.$store.state.token)
+
       const result = await this.$apollo.query({
         query: ME_QUERY
       })
@@ -38,7 +36,7 @@ export default {
         this.me = data.me
       })
       .catch(error => console.warn(error))
-    } else if (this.$keycloak) {
+    } else {
       this.$keycloak.loginFn()
     }
   }

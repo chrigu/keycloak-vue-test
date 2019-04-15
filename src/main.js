@@ -3,7 +3,7 @@ import App from './App.vue'
 import VueKeyCloak from '@dsb-norge/vue-keycloak-js'
 import router from './router'
 import store from './store'
-import { createProvider } from './vue-apollo'
+import { createProvider, onLogin } from './vue-apollo'
 
 Vue.config.productionTip = false
 
@@ -18,16 +18,30 @@ Vue.use(VueKeyCloak, {
   init: {
     onLoad: 'check-sso'
   },
-  onReady: function (keycloak) {
-    // console.log(keycloak)
-    store.commit('addToken', keycloak.token)
+  onReady: async function (keycloak) {
+
+    const apolloProvider = createProvider();
+
+    new Vue({
+      router,
+      store,
+      apolloProvider,
+      render: h => h(App)
+    }).$mount('#app')
+
+
+    if (keycloak.authenticated) {
+      store.dispatch('addToken', keycloak.token)
+      await onLogin(apolloProvider.defaultClient, keycloak.token)
+      console.log(keycloak.idTokenParsed)
+      store.dispatch('setName', {
+        firstName: keycloak.idTokenParsed.given_name,
+        lastName: keycloak.idTokenParsed.family_name
+      })
+      store.dispatch('setEmail', keycloak.idTokenParsed.email)
+      store.dispatch('setUsername', keycloak.idTokenParsed.username)
+    }
     console.log(`I wonder what Keycloak returns:`, keycloak)
   }
 })
 
-new Vue({
-  router,
-  store,
-  apolloProvider: createProvider(),
-  render: h => h(App)
-}).$mount('#app')
