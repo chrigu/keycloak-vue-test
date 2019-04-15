@@ -13,15 +13,14 @@ Vue.use(VueKeyCloak, {
     authRealm: 'sso',
     authUrl: 'http://localhost:8080/auth',
     authClientId: 'vue',
-    logoutRedirectUri: 'http://localhost:8080/auth/realms/vue/protocol/openid-connect/logout?redirect_uri=encodedRedirectUri',
-    flow: 'implicit'
+    logoutRedirectUri: 'http://localhost:8080/auth/realms/vue/protocol/openid-connect/logout?redirect_uri=encodedRedirectUri'
   },
   init: {
     onLoad: 'check-sso'
   },
   onReady: function (keycloak) {
-    console.log(store)
-    store.commit('addToken', keycloak.idToken)
+    // console.log(keycloak)
+    store.commit('addToken', keycloak.token)
     console.log(`I wonder what Keycloak returns:`, keycloak)
   }
 })
